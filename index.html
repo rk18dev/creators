@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Creator Wall</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: #0b0b0b;
+    color: white;
+    overflow: hidden;
+  }
+
+  /* Header */
+  .header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(10px);
+    z-index: 10;
+  }
+
+  .title {
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .cta {
+    background: white;
+    color: black;
+    padding: 6px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+
+  /* Grid */
+  #grid {
+    position: absolute;
+    top: 60px;
+    width: 100vw;
+    height: calc(100vh - 60px);
+    display: grid;
+    grid-template-columns: repeat(50, 1fr);
+    grid-template-rows: repeat(50, 1fr);
+  }
+
+  .tile {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+  }
+
+  .tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.2s ease;
+  }
+
+  .tile:hover img {
+    transform: scale(1.2);
+  }
+
+  /* Overlay */
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    opacity: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(6px, 0.5vw, 12px);
+    text-align: center;
+    transition: 0.2s;
+  }
+
+  .tile:hover .overlay {
+    opacity: 1;
+  }
+
+  /* Sold */
+  .sold {
+    filter: grayscale(100%);
+  }
+
+  .badge {
+    position: absolute;
+    bottom: 2px;
+    right: 4px;
+    font-size: 6px;
+    padding: 2px 4px;
+    border-radius: 3px;
+  }
+
+  .sold-badge {
+    background: red;
+  }
+
+  .avail-badge {
+    background: green;
+  }
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <div class="title">🔥 Creator Wall</div>
+  <div class="cta">Buy Your Spot</div>
+</div>
+
+<div id="grid"></div>
+
+<script>
+  const GRID = 50;
+  const grid = document.getElementById("grid");
+
+  const occupied = Array.from({ length: GRID }, () =>
+    Array(GRID).fill(false)
+  );
+
+  function canPlace(r, c, size) {
+    if (r + size > GRID || c + size > GRID) return false;
+
+    for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
+        if (occupied[r + i][c + j]) return false;
+      }
+    }
+    return true;
+  }
+
+  function markPlaced(r, c, size) {
+    for (let i = 0; i < size; i++) {
+      for (let j = 0; j < size; j++) {
+        occupied[r + i][c + j] = true;
+      }
+    }
+  }
+
+  function createTile(size, index) {
+    const isSold = Math.random() < 0.3;
+
+    const tile = document.createElement("div");
+    tile.className = "tile";
+    tile.style.gridColumn = `span ${size}`;
+    tile.style.gridRow = `span ${size}`;
+
+    tile.innerHTML = `
+      <img class="${isSold ? 'sold' : ''}" src="https://i.pravatar.cc/100?img=${index % 70}" />
+      <div class="overlay">
+        ${isSold ? "Owned" : "Available"}<br/>
+        ${size}×${size}
+      </div>
+      <div class="badge ${isSold ? 'sold-badge' : 'avail-badge'}">
+        ${isSold ? "SOLD" : "$" + (size * size * 10)}
+      </div>
+    `;
+
+    tile.onclick = () => {
+      if (!isSold) {
+        alert(`Buy ${size}x${size} spot 🚀`);
+      }
+    };
+
+    return tile;
+  }
+
+  let index = 0;
+
+  for (let r = 0; r < GRID; r++) {
+    for (let c = 0; c < GRID; c++) {
+
+      if (occupied[r][c]) continue;
+
+      let size = 1;
+
+      // center bias (bigger tiles near center)
+      const centerDist = Math.abs(r - GRID/2) + Math.abs(c - GRID/2);
+
+      if (centerDist < 10 && canPlace(r, c, 4)) size = 4;
+      else if (centerDist < 20 && canPlace(r, c, 3)) size = 3;
+      else if (Math.random() < 0.25 && canPlace(r, c, 2)) size = 2;
+
+      markPlaced(r, c, size);
+
+      const tile = createTile(size, index++);
+      grid.appendChild(tile);
+    }
+  }
+</script>
+
+</body>
+</html>
