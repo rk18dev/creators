@@ -92,27 +92,9 @@
     opacity: 1;
   }
 
-  /* Sold */
-  .sold {
-    filter: grayscale(100%);
-  }
+  
 
-  .badge {
-    position: absolute;
-    bottom: 2px;
-    right: 4px;
-    font-size: 6px;
-    padding: 2px 4px;
-    border-radius: 3px;
-  }
 
-  .sold-badge {
-    background: red;
-  }
-
-  .avail-badge {
-    background: green;
-  }
 
 </style>
 </head>
@@ -162,13 +144,9 @@
     tile.style.gridRow = `span ${size}`;
 
     tile.innerHTML = `
-      <img class="${isSold ? 'sold' : ''}" src="https://i.pravatar.cc/100?img=${index % 70}" />
+      <img src="https://i.pravatar.cc/100?img=${index % 70}" />
       <div class="overlay">
-        ${isSold ? "Owned" : "Available"}<br/>
         ${size}×${size}
-      </div>
-      <div class="badge ${isSold ? 'sold-badge' : 'avail-badge'}">
-        ${isSold ? "SOLD" : "$" + (size * size * 10)}
       </div>
     `;
 
